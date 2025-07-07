@@ -2,7 +2,7 @@
 
 server {
     listen 80;
-    server_name 109.73.207.33;
+    server_name your_ip;
     
     # Redirect HTTP to HTTPS
     location / {
@@ -12,7 +12,7 @@ server {
 
 server {
     listen 443 ssl;
-    server_name 109.73.207.33;
+    server_name your_ip;
 
     ssl_certificate /etc/ssl/certs/webhook-selfsigned.crt;
     ssl_certificate_key /etc/ssl/private/webhook-selfsigned.key;
