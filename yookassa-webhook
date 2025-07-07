@@ -1,0 +1,55 @@
+#pull this file to /etc/nginx/sites-available/yookassa-webhook
+
+server {
+    listen 80;
+    server_name 109.73.207.33;
+    
+    # Redirect HTTP to HTTPS
+    location / {
+        return 301 https://$host$request_uri;
+    }
+}
+
+server {
+    listen 443 ssl;
+    server_name 109.73.207.33;
+
+    ssl_certificate /etc/ssl/certs/webhook-selfsigned.crt;
+    ssl_certificate_key /etc/ssl/private/webhook-selfsigned.key;
+    
+    ssl_protocols TLSv1.2 TLSv1.3;
+    ssl_prefer_server_ciphers on;
+    ssl_ciphers ECDHE-RSA-AES256-GCM-SHA512:DHE-RSA-AES256-GCM-SHA512:ECDHE-RSA-AES256-GCM-SHA384:DHE-RSA-AES256-GCM-SHA384;
+    
+    # Webhook endpoint
+    location /webhook {
+        proxy_pass http://localhost:8000/webhook;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+    
+    # Health check endpoint
+    location /health {
+        proxy_pass http://localhost:8000/health;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+    }
+    
+    # Test webhook endpoint
+    location ~ ^/test-webhook/(.*)$ {
+        proxy_pass http://localhost:8000/test-webhook/$1;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+    
+    # Debug endpoint
+    location /debug/storage {
+        proxy_pass http://localhost:8000/debug/storage;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+    }
+}
